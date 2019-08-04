@@ -38,7 +38,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="user in users" :key="user.id">
+                <tr v-for="user in users.data" :key="user.id">
                   <td class="text-center">{{ user.id }}</td>
                   <td>{{ user.name }}</td>
                   <td>{{ user.email }}</td>
@@ -59,6 +59,12 @@
               </table>
             </div>
             <!-- /.card-body -->
+            <div class="card-footer">
+                <pagination :data="users" @pagination-change-page="getResults">
+                    <span slot="prev-nav"><i class="fas fa-angle-left"></i></span>
+                    <span slot="next-nav"><i class="fas fa-angle-right"></i></span>
+                </pagination>
+            </div>
           </div>
           <!-- /.card -->
 
@@ -118,7 +124,7 @@
                                 <has-error :form="form" field="bio"></has-error>
                             </div>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="photo">
+                                <input type="file" @change="uploadImage" class="custom-file-input" id="photo">
                                 <label class="custom-file-label" for="photo">Upload image...</label>
                             </div>
                         </div>
@@ -156,7 +162,14 @@
 
         methods: {
             loadUsers() {
-                axios.get('api/user').then(({ data }) => (this.users = data.data));
+                axios.get('api/user').then(({ data }) => (this.users = data));
+            },
+
+            getResults(page = 1) {
+                axios.get('api/user/?page=' + page)
+                    .then(response => {
+                        this.users = response.data;
+                    });
             },
 
             openModal() {
@@ -185,6 +198,24 @@
                 }).catch(() => {
 
                 });
+            },
+
+            uploadImage(e) {
+                let file = e.target.files[0];
+                //console.log(file);
+                let reader = new FileReader();
+                if(file['size'] < 1048576) {
+                    reader.onloadend = (file) => {
+                        this.form.photo = reader.result;
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    Swal.fire(
+                      'Ops!',
+                      'Your file is large.',
+                      'worning'
+                    );
+                }
             },
 
             updateUser() {
