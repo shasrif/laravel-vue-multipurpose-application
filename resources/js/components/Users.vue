@@ -1,6 +1,6 @@
 <template>
     <section class="content">
-        <div class="content-header">
+        <div class="content-header" v-if="$gate.isAdminOrAuthor()">
             <div class="row mb-2">
               <div class="col-sm-6">
                 <h1>Users</h1>
@@ -14,7 +14,11 @@
             </div>
         </div>
 
-        <div class="card">
+        <div v-if="!$gate.isAdminOrAuthor()">
+          <not-found></not-found>
+        </div>
+
+        <div class="card" v-if="$gate.isAdminOrAuthor()">
             <div class="card-header">
               <h3 class="card-title">Users</h3>
               <div class="card-tools">
@@ -162,7 +166,9 @@
 
         methods: {
             loadUsers() {
+              if(this.$gate.isAdminOrAuthor()) {
                 axios.get('api/user').then(({ data }) => (this.users = data));
+              }
             },
 
             getResults(page = 1) {
@@ -266,6 +272,16 @@
 
             Fire.$on('newAction', () => {
                 this.loadUsers();
+            });
+
+            Fire.$on('searching', () => {
+              let query = this.$parent.search;
+              axios.get('api/findUser?q=' + query)
+              .then((data) => {
+                this.users = data.data;
+              }).catch(() => {
+
+              })
             });
         }
     }

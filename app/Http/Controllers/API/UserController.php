@@ -94,6 +94,11 @@ class UserController extends Controller
             \Image::make($request->photo)->save(public_path('upload/').$name);
 
             $request->merge(['photo' => $name]);
+
+            $photo_path = public_path('upload/') . $user->photo;
+            if(file_exists($photo_path)) {
+                @unlink($photo_path);
+            }
         }
 
         $user->update($request->all());
@@ -123,6 +128,11 @@ class UserController extends Controller
             \Image::make($request->photo)->save(public_path('upload/').$name);
 
             $request->merge(['photo' => $name]);
+
+            $photo_path = public_path('upload/') . $user->photo;
+            if(file_exists($photo_path)) {
+                @unlink($photo_path);
+            }
         }
 
         $user->update($request->all());
@@ -140,5 +150,19 @@ class UserController extends Controller
         $user = User::FindOrFail($id);
         $user->delete();
         return ['message' => 'User deleted'];
+    }
+
+    public function search()
+    {
+        $search = \Request::get('q');
+        if($search) {
+            $users = User::where(function($query) use ($search){
+                $query->where('name', 'LIKE', "%$search%")
+                ->orWhere('email', 'LIKE', "%$search%")
+                ->orWhere('type', 'LIKE', "%$search%");
+            })->paginate(5);
+
+            return $users;
+        }
     }
 }

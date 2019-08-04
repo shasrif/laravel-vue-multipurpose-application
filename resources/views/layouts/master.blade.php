@@ -29,23 +29,21 @@
     </ul>
 
     <!-- SEARCH FORM -->
-    <form class="form-inline ml-3">
-      <div class="input-group input-group-sm">
-        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-        <div class="input-group-append">
-          <button class="btn btn-navbar" type="submit">
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
+    <div class="input-group input-group-sm">
+      <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" v-model="search" @keyup="searchit">
+      <div class="input-group-append">
+        <button class="btn btn-navbar" type="submit" @click="searchit">
+          <i class="fas fa-search"></i>
+        </button>
       </div>
-    </form>
+    </div>
   </nav>
   <!-- /.navbar -->
 
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="{{ url('/home') }}" class="brand-link">
+    <a href="{{ url('/dashboard') }}" class="brand-link">
       <img src="{{ asset( 'assets/images/logo.png' ) }}"
            alt="AdminLTE Logo"
            class="brand-image img-circle elevation-3"
@@ -78,6 +76,8 @@
               </p>
             </router-link>
           </li>
+
+          @can('isAdmin')
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-cog green"></i>
@@ -95,6 +95,8 @@
               </li>
             </ul>
           </li>
+          @endcan
+
           <li class="nav-item">
             <router-link to="/profile" class="nav-link">
               <i class="nav-icon fas fa-user-tie orange"></i>
@@ -146,7 +148,11 @@
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
-
+  @auth
+    <script>
+      window.user = @json(auth()->user())
+    </script>
+  @endauth
   <!-- Scripts -->
   <script src="{{ asset('js/app.js') }}" defer></script>
 </body>
